@@ -25,7 +25,8 @@
       "Bash(gh repo:*)",
       "Bash(git tag:*)",
       "WebFetch(domain:github.com)",
-      "Bash(gh release:*)"
+      "Bash(gh release:*)",
+      "Bash(chmod:*)"
     ]
   }
 }
