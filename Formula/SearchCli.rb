@@ -3,7 +3,7 @@ class Searchcli < Formula
   homepage "https://github.com/scian0204/SearchCli"
   url "https://github.com/scian0204/SearchCli/releases/download/v1.0.0/searchcli"
   version "1.0.0"
-  sha256 ":placeholder"
+  sha256 "708e1614e9b264a9d2d9619b962f2a9fbd78eb079ee9685a6f6325d120872176"
   license "MIT"
 
   depends_on :macos
