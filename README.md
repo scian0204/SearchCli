@@ -12,12 +12,32 @@ Go 로 작성된 명령어 라인 기반 웹 검색 도구입니다. DuckDuckGo 
 
 ## 설치
 
-### 사전 요구사항
+### Homebrew (macOS/Linux)
+
+```bash
+brew tap scian0204/SearchCli
+brew install searchcli
+```
+
+### GitHub Releases
+
+[릴리스 페이지](https://github.com/scian0204/SearchCli/releases) 에서 플랫폼에 맞는 이진 파일을 다운로드하세요.
+
+```bash
+# 자동 설치 스크립트 사용
+curl -sSf https://raw.githubusercontent.com/scian0204/SearchCli/main/install.sh | sh
+
+# 또는 수동 다운로드 (예: v1.0.0)
+curl -L https://github.com/scian0204/SearchCli/releases/download/v1.0.0/searchcli -o /usr/local/bin/searchcli
+chmod +x /usr/local/bin/searchcli
+```
+
+### 소스에서 빌드
+
+#### 사전 요구사항
 
 - Go 1.16 이상
 - 인터넷 연결
-
-### 빌드
 
 ```bash
 # 의존성 설치

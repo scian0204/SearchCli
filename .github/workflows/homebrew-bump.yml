@@ -1,0 +1,23 @@
+name: Homebrew Bump
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  homebrew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bump Formula
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: searchcli
+          homebrew-tap: scian0204/homebrew-searchcli
+          download-url: ${{ github.event.release.zipball_url }}
+        env:
+          COMMITTER_USERNAME: scian0204
+          COMMITTER_EMAIL: scian0204@users.noreply.github.com
+          HOMEAUTH_TOKEN: ${{ secrets.HOMEBREW_TOKEN }}
