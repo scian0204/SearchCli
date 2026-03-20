@@ -2,6 +2,16 @@
 
 Go 로 작성된 명령어 라인 기반 웹 검색 도구입니다. DuckDuckGo 와 Bing 검색 엔진을 지원하며, 검색 결과 페이지를 크롤링하여 상세 내용을 추출할 수 있습니다.
 
+## 🎯 빠른 시작
+
+```bash
+# 1 줄로 설치 (macOS/Linux)
+curl -sSf https://raw.githubusercontent.com/scian0204/SearchCli/main/install.sh | sh
+
+# 바로 사용
+searchcli -q "go programming language"
+```
+
 ## 기능
 
 - **다중 검색 엔진 지원**: DuckDuckGo, Bing 검색 가능
