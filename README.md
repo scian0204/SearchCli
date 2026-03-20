@@ -15,7 +15,7 @@ Go 로 작성된 명령어 라인 기반 웹 검색 도구입니다. DuckDuckGo 
 ### Homebrew (macOS/Linux)
 
 ```bash
-brew tap scian0204/SearchCli
+brew tap scian0204/SearchCli https://github.com/scian0204/SearchCli.git
 brew install searchcli
 ```
 
