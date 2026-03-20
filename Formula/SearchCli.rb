@@ -9,7 +9,7 @@ class Searchcli < Formula
   depends_on :macos
 
   def install
-    bin.install "searchcli" => "searchcli"
+    bin.install "searchcli-darwin-arm64" => "searchcli"
   end
 
   test do
