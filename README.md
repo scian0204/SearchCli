@@ -19,18 +19,23 @@ brew tap scian0204/SearchCli
 brew install searchcli
 ```
 
+### 자동 설치 스크립트
+
+#### macOS/Linux
+
+```bash
+curl -sSf https://raw.githubusercontent.com/scian0204/SearchCli/main/install.sh | sh
+```
+
+#### Windows (PowerShell)
+
+```powershell
+iwr https://raw.githubusercontent.com/scian0204/SearchCli/main/install.ps1 -UseBasicParsing | iex
+```
+
 ### GitHub Releases
 
 [릴리스 페이지](https://github.com/scian0204/SearchCli/releases) 에서 플랫폼에 맞는 이진 파일을 다운로드하세요.
-
-```bash
-# 자동 설치 스크립트 사용
-curl -sSf https://raw.githubusercontent.com/scian0204/SearchCli/main/install.sh | sh
-
-# 또는 수동 다운로드 (예: v1.0.0)
-curl -L https://github.com/scian0204/SearchCli/releases/download/v1.0.0/searchcli -o /usr/local/bin/searchcli
-chmod +x /usr/local/bin/searchcli
-```
 
 ### 소스에서 빌드
 
@@ -44,7 +49,25 @@ chmod +x /usr/local/bin/searchcli
 go mod download
 
 # 이진 파일 빌드
-go build -o searchcli
+go build -o searchcli .
+
+# 또는 빌드 스크립트 사용
+./build.sh
+
+# 또는 Makefile 사용
+make build
+```
+
+### Makefile 명령
+
+```bash
+make build        # 현재 플랫폼용 빌드
+make build-all    # 다중 플랫폼 빌드
+make install      # 시스템에 설치 (/usr/local/bin)
+make uninstall    # 시스템에서 제거
+make clean        # 빌드 파일 정리
+make test         # 테스트 실행
+make help         # 도움말 표시
 ```
 
 ## 사용법
@@ -53,10 +76,10 @@ go build -o searchcli
 
 ```bash
 # DuckDuckGo 로 검색 (기본)
-./searchcli -q "go programming language"
+searchcli -q "go programming language"
 
 # Bing 으로 검색
-./searchcli -q "go programming language" -engine bing
+searchcli -q "go programming language" -engine bing
 ```
 
 ### 링크 크롤링
@@ -65,26 +88,26 @@ go build -o searchcli
 
 ```bash
 # 최대 5 개의 링크 크롤링
-./searchcli -q "go programming language" -crawl -max-links 5
+searchcli -q "go programming language" -crawl -max-links 5
 
 # 10 개의 링크 크롤링
-./searchcli -q "go programming language" -crawl -max-links 10
+searchcli -q "go programming language" -crawl -max-links 10
 ```
 
 ### 결과 저장
 
 ```bash
 # JSON 파일로 저장
-./searchcli -q "go programming language" -output results.json
+searchcli -q "go programming language" -output results.json
 
 # 크롤링 후 파일 저장
-./searchcli -q "go programming language" -crawl -output results.json
+searchcli -q "go programming language" -crawl -output results.json
 ```
 
 ### 도움말
 
 ```bash
-./searchcli -help
+searchcli -help
 ```
 
 ## 명령어 옵션
@@ -136,7 +159,7 @@ go build -o searchcli
 | `results.link` | 결과 URL |
 | `results.snippet` | 결과 미리보기 텍스트 |
 | `results.display_link` | 표시용 도메인 이름 |
-| `results.crawled_content` | 크롤링된 페이지 내용 ( `-crawl` 옵션 사용 시) |
+| `results.crawled_content` | 크롤링된 페이지 내용 (`-crawl` 옵션 사용 시) |
 
 ## 프로젝트 구조
 
@@ -146,6 +169,10 @@ SearchCli/
 ├── models.go         # 데이터 구조 정의
 ├── search_parser.go  # 검색 결과 HTML/XML 파서
 ├── content_crawler.go # 웹 페이지 크롤러
+├── build.sh          # 빌드 스크립트
+├── install.sh        # macOS/Linux 설치 스크립트
+├── install.ps1       # Windows 설치 스크립트
+├── Makefile          # 빌드/설치 자동화
 ├── go.mod            # Go 모듈 정의
 ├── go.sum            # 의존성 체크섬
 └── searchcli         # 컴파일된 이진 파일
@@ -159,6 +186,10 @@ SearchCli/
 | `models.go` | SearchResult, Result, CrawledContent 구조체 |
 | `search_parser.go` | DuckDuckGo/Bing HTML 파싱 로직 |
 | `content_crawler.go` | 페이지 내용 추출 (제목, 본문, 링크 등) |
+| `build.sh` | 크로스 플랫폼 빌드 스크립트 |
+| `install.sh` | macOS/Linux 자동 설치 |
+| `install.ps1` | Windows 자동 설치 |
+| `Makefile` | 빌드/설치/테스트 자동화 |
 
 ## 기술 스택
 
@@ -171,19 +202,19 @@ SearchCli/
 ### Python 튜토리얼 검색
 
 ```bash
-./searchcli -q "python tutorial for beginners"
+searchcli -q "python tutorial for beginners"
 ```
 
 ### 크롤링하여 블로그 내용 추출
 
 ```bash
-./searchcli -q "golang best practices" -crawl -max-links 3 -output golang-practices.json
+searchcli -q "golang best practices" -crawl -max-links 3 -output golang-practices.json
 ```
 
 ### Bing 으로 특정 주제 검색
 
 ```bash
-./searchcli -q "machine learning basics" -engine bing -crawl
+searchcli -q "machine learning basics" -engine bing -crawl
 ```
 
 ## 주의사항

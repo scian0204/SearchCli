@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SearchCli 설치 스크립트
+# SearchCli 설치 스크립트 (macOS/Linux)
 
 set -e
 
@@ -36,14 +36,14 @@ esac
 
 echo "🖥️ 플랫폼: $OS/$ARCH"
 
-# 다운로드
-URL="https://github.com/${REPO}/releases/download/${VERSION}/searchcli"
+# 다운로드 URL (플랫폼별)
+URL="https://github.com/${REPO}/releases/download/${VERSION}/searchcli_${OS}_${ARCH}"
 TMP_FILE=$(mktemp)
 
 echo "⬇️ 다운로드 중..."
 curl -sL -o "$TMP_FILE" "$URL"
 
-# 설치
+# 설치 경로
 INSTALL_PATH="/usr/local/bin/searchcli"
 
 if [ ! -d "/usr/local/bin" ]; then
