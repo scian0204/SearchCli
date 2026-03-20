@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ${{ matrix.platform }}
@@ -26,11 +29,9 @@ jobs:
       - name: Build
         run: go build -ldflags="-s -w" -o searchcli
 
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+      - name: Release
+        uses: ncipollo/release-action@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: searchcli
-          tag: ${{ github.ref }}
-          overwrite: true
-          file_glob: true
+          artifacts: searchcli
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
