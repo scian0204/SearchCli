@@ -9,7 +9,7 @@ import (
 func main() {
 	// Define CLI flags
 	query := flag.String("q", "", "Search query")
-	engine := flag.String("engine", "ddg", "Search engine: ddg (DuckDuckGo), bing (Bing)")
+	engine := flag.String("engine", "bing", "Search engine: bing (Bing), ddg (DuckDuckGo)")
 	crawl := flag.Bool("crawl", false, "Enable crawling of search result links")
 	maxLinks := flag.Int("max-links", 5, "Maximum number of links to crawl (default: 5)")
 	output := flag.String("output", "", "Output file path (if empty, prints to stdout)")
@@ -68,14 +68,14 @@ Usage:
 
 Options:
   -q string           Search query (required)
-  -engine string      Search engine: ddg (DuckDuckGo), bing (Bing) (default: ddg)
+  -engine string      Search engine: bing (Bing), ddg (DuckDuckGo) (default: bing)
   -crawl              Enable crawling of search result links
   -max-links int      Maximum number of links to crawl (default: 5)
   -output string      Output file path (if empty, prints to stdout)
   -help               Show this help message
 
 Examples:
-  # Search with DuckDuckGo
+  # Search with Bing (default)
   ./searchcli -q "python programming"
 
   # Search with link crawling
@@ -84,6 +84,6 @@ Examples:
   # Save results to file
   ./searchcli -q "python programming" -crawl -output results.json
 
-  # Use Bing
-  ./searchcli -q "python programming" -engine bing`)
+  # Use DuckDuckGo
+  ./searchcli -q "python programming" -engine ddg`)
 }
