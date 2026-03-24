@@ -2,6 +2,7 @@ package main
 
 import (
 	"compress/gzip"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -23,7 +24,7 @@ func FetchSearch(query, engine string) (*SearchResult, error) {
 	switch engine {
 	case "ddg", "duckduckgo":
 		data, err = fetchDuckDuckGo(query)
-	case "bing":
+	case "bing", "":
 		data, err = fetchBing(query)
 	default:
 		return nil, fmt.Errorf("unsupported search engine: %s", engine)
@@ -145,41 +146,7 @@ func readResponseBody(resp *http.Response) ([]byte, error) {
 	return data, nil
 }
 
-// FetchGoogleSearch sends a GET request to the Google search URL and returns the response body
-func FetchGoogleSearch(searchURL string) ([]byte, error) {
-	client := &http.Client{
-		Timeout: 30 * time.Second,
-	}
-
-	req, err := http.NewRequest("GET", searchURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
-	req.Header.Set("Connection", "keep-alive")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch search results: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	return body, nil
-}
-
-// ParseSearchXML parses the XML response from Google search and converts it to SearchResult
+// ParseSearchXML parses the XML response from search and converts it to SearchResult
 func ParseSearchXML(xmlData []byte) (*SearchResult, error) {
 	var rss GoogleSearchXML
 	if err := xml.Unmarshal(xmlData, &rss); err != nil {
@@ -232,7 +199,7 @@ func extractResultsFromHTML(doc *html.Node) []Result {
 
 	var extract func(*html.Node)
 	extract = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "div" {
+		if n.Type == html.ElementNode {
 			for _, attr := range n.Attr {
 				if attr.Key == "class" {
 					// DuckDuckGo individual result: "result results_links results_links_deep web-result"
@@ -243,7 +210,7 @@ func extractResultsFromHTML(doc *html.Node) []Result {
 						}
 						return
 					}
-					// Bing uses b_algo class
+					// Bing uses b_algo class (on <li> elements)
 					if strings.Contains(attr.Val, "b_algo") {
 						result := extractBingResult(n)
 						if result.Title != "" && result.Link != "" {
@@ -368,9 +335,14 @@ func extractBingResult(n *html.Node) Result {
 	findLink = func(node *html.Node) {
 		if node.Type == html.ElementNode && node.Data == "a" {
 			for _, attr := range node.Attr {
-				if attr.Key == "href" && strings.HasPrefix(attr.Val, "http") {
-					if !strings.Contains(attr.Val, "bing.com") {
-						result.Link = attr.Val
+				if attr.Key == "href" {
+					link := attr.Val
+					// Bing uses redirect URLs with /ck/a path, extract the actual URL
+					if strings.Contains(link, "/ck/a") {
+						link = extractBingRedirectURL(link)
+					}
+					if strings.HasPrefix(link, "http") && !strings.Contains(link, "bing.com") {
+						result.Link = link
 						return
 					}
 				}
@@ -382,13 +354,18 @@ func extractBingResult(n *html.Node) Result {
 	}
 
 	findSnippet = func(node *html.Node) {
-		if node.Type == html.ElementNode && node.Data == "p" {
-			var text strings.Builder
-			extractTextFromNode(node, &text)
-			trimmed := strings.TrimSpace(text.String())
-			if trimmed != "" && len(trimmed) > 20 {
-				result.Snippet = trimmed
-				return
+		// Bing snippet is in <div class="b_caption"><p class="b_lineclamp2">
+		if node.Type == html.ElementNode && node.Data == "div" {
+			for _, attr := range node.Attr {
+				if attr.Key == "class" && strings.Contains(attr.Val, "b_caption") {
+					var text strings.Builder
+					extractTextFromNode(node, &text)
+					trimmed := strings.TrimSpace(text.String())
+					if trimmed != "" {
+						result.Snippet = trimmed
+						return
+					}
+				}
 			}
 		}
 		for c := node.FirstChild; c != nil; c = c.NextSibling {
@@ -403,6 +380,38 @@ func extractBingResult(n *html.Node) Result {
 	return result
 }
 
+// extractBingRedirectURL extracts the actual URL from Bing's redirect URL
+func extractBingRedirectURL(link string) string {
+	// First decode HTML entities (amp; -> &)
+	link = strings.ReplaceAll(link, "&amp;", "&")
+
+	u, err := url.Parse(link)
+	if err != nil {
+		return ""
+	}
+
+	// Bing uses 'u' parameter for the encoded URL
+	encodedURL := u.Query().Get("u")
+	if encodedURL != "" {
+		// URL is base64 encoded with a1 prefix
+		if strings.HasPrefix(encodedURL, "a1") {
+			encodedURL = encodedURL[2:]
+		}
+		// Decode base64
+		decoded, err := base64.StdEncoding.DecodeString(encodedURL)
+		if err != nil {
+			// Try URL decoding as fallback
+			decodedStr, err2 := url.QueryUnescape(encodedURL)
+			if err2 != nil {
+				return ""
+			}
+			return decodedStr
+		}
+		return string(decoded)
+	}
+	return ""
+}
+
 // extractTextFromNode extracts text content from a node
 func extractTextFromNode(n *html.Node, text *strings.Builder) {
 	if n.Type == html.TextNode {
@@ -413,7 +422,7 @@ func extractTextFromNode(n *html.Node, text *strings.Builder) {
 	}
 }
 
-// extractQueryFromTitle tries to extract the search query from Google's RSS title format
+// extractQueryFromTitle tries to extract the search query from RSS title format
 func extractQueryFromTitle(title string) string {
 	parts := strings.Split(title, " - ")
 	if len(parts) > 1 {
@@ -422,32 +431,9 @@ func extractQueryFromTitle(title string) string {
 	return title
 }
 
-// FetchAndParseSearch combines fetching and parsing into a single function
-func FetchAndParseSearch(searchURL string) (*SearchResult, error) {
-	data, err := FetchGoogleSearch(searchURL)
-	if err != nil {
-		return nil, err
-	}
-
-	if isXML(data) {
-		return ParseSearchXML(data)
-	}
-
-	return ParseSearchHTML(data)
-}
-
 // isXML checks if the data is XML format
 func isXML(data []byte) bool {
 	return strings.Contains(string(data), "<?xml") || strings.HasPrefix(strings.TrimSpace(string(data)), "<rss")
-}
-
-// ExtractQueryFromSearchURL extracts the search query from a Google search URL
-func ExtractQueryFromSearchURL(searchURL string) (string, error) {
-	u, err := url.Parse(searchURL)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse URL: %w", err)
-	}
-	return u.Query().Get("q"), nil
 }
 
 // ToJSON converts a SearchResult to JSON bytes
