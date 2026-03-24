@@ -1,6 +1,6 @@
 # Search CLI
 
-Go 로 작성된 명령어 라인 기반 웹 검색 도구입니다. DuckDuckGo 와 Bing 검색 엔진을 지원하며, 검색 결과 페이지를 크롤링하여 상세 내용을 추출할 수 있습니다.
+Go 로 작성된 명령어 라인 기반 웹 검색 도구입니다. Bing 과 DuckDuckGo 검색 엔진을 지원하며, 검색 결과 페이지를 크롤링하여 상세 내용을 추출할 수 있습니다.
 
 ## 🎯 빠른 시작
 
@@ -8,13 +8,13 @@ Go 로 작성된 명령어 라인 기반 웹 검색 도구입니다. DuckDuckGo 
 # 1 줄로 설치 (macOS/Linux)
 curl -sSf https://raw.githubusercontent.com/scian0204/SearchCli/main/install.sh | sh
 
-# 바로 사용
+# 바로 사용 (Bing 검색)
 searchcli -q "go programming language"
 ```
 
 ## 기능
 
-- **다중 검색 엔진 지원**: DuckDuckGo, Bing 검색 가능
+- **다중 검색 엔진 지원**: Bing, DuckDuckGo 검색 가능
 - **HTML 파싱**: 검색 결과 페이지를 자동으로 파싱하여 구조화된 데이터 추출
 - **웹 크롤링**: 검색 결과 링크를 방문하여 페이지 내용 추출
 - **JSON 출력**: 결과를 JSON 형식으로 출력 또는 파일 저장
@@ -85,11 +85,11 @@ make help         # 도움말 표시
 ### 기본 검색
 
 ```bash
-# DuckDuckGo 로 검색 (기본)
+# Bing 으로 검색 (기본)
 searchcli -q "go programming language"
 
-# Bing 으로 검색
-searchcli -q "go programming language" -engine bing
+# DuckDuckGo 로 검색
+searchcli -q "go programming language" -engine ddg
 ```
 
 ### 링크 크롤링
@@ -125,7 +125,7 @@ searchcli -help
 | 옵션 | 설명 | 기본값 |
 |------|------|--------|
 | `-q string` | 검색어 (필수) | - |
-| `-engine string` | 검색 엔진: `ddg`, `bing` | `ddg` |
+| `-engine string` | 검색 엔진: `bing`, `ddg` | `bing` |
 | `-crawl` | 링크 크롤링 활성화 | `false` |
 | `-max-links int` | 크롤링할 최대 링크 수 | `5` |
 | `-output string` | 출력 파일 경로 (비우면 stdout) | - |
